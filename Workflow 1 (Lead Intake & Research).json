@@ -1,0 +1,389 @@
+{
+  "name": "Workflow 1 (Lead Intake & Research)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ce82669f-331c-4088-958c-6cc2085130f1",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f5fea62a-ad23-41c5-b6cf-c5bdadf811b2",
+      "name": "Webhook",
+      "webhookId": "ce82669f-331c-4088-958c-6cc2085130f1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Research the following business using the scraped website content below:\nBusiness Name: {{ $('Webhook').item.json.body.businessName }}\nBusiness Size: {{ $('Webhook').item.json.body.businessSize }}\nWebsite: {{ $('Webhook').item.json.body.website }}\n\nScraped Website Content:\n{{ ($json.data || '').slice(0, 12000) }}\n\nWrite a concise 4-5 sentence summary covering what they do, their target audience, and key products/services.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c7b155ea-6bf0-4ec9-8f36-dd354fb5e5bb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        272
+      ],
+      "id": "3acf3aa6-248f-43a2-acf0-8cce282a3d93",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nN2G9F0oPHnasqsJ",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1whmJfwdZMUzCcKPAUmbpGugw6wWyXgpxBN5AcIPcgNU",
+          "mode": "list",
+          "cachedResultName": "Lead_Research_DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1whmJfwdZMUzCcKPAUmbpGugw6wWyXgpxBN5AcIPcgNU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 362098504,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1whmJfwdZMUzCcKPAUmbpGugw6wWyXgpxBN5AcIPcgNU/edit#gid=362098504"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TimeStamp": "={{ $now.toISO() }}",
+            "Full_Name": "={{ $('Webhook').item.json.body.fullName }}",
+            "Business_Name": "={{ $('Webhook').item.json.body.businessName }}",
+            "Business_Size": "={{ $('Webhook').item.json.body.businessSize }}",
+            "Website": "={{ $('Webhook').item.json.body.website }}",
+            "Research_Summary": "={{ $('AI Agent').item.json.output }}",
+            "Status": "Researched"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "TimeStamp",
+              "displayName": "TimeStamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full_Name",
+              "displayName": "Full_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business_Name",
+              "displayName": "Business_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business_Size",
+              "displayName": "Business_Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Research_Summary",
+              "displayName": "Research_Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        496,
+        48
+      ],
+      "id": "b7e282e8-0956-4e34-9953-2280005bb0eb",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CF3CDYtVbSutaL0i",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1b33fb46-d09b-4033-9163-3ae9ecf117cd",
+              "name": "document_text",
+              "value": "=Company: {{ $('Webhook').item.json.body.businessName }} Contact: {{ $('Webhook').item.json.body.fullName }} Company Size: {{ $('Webhook').item.json.body.businessSize }} Website: {{ $('Webhook').item.json.body.website }} Research Summary: {{ $('AI Agent').item.json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        720,
+        48
+      ],
+      "id": "050a68b7-e63c-4690-888b-3d7fb4f156f8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "clearStore": "={{ false }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.4,
+      "position": [
+        944,
+        48
+      ],
+      "id": "690ecedc-61d9-4b67-895b-a1e78c382af3",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        304
+      ],
+      "id": "3072b194-1b47-4161-946f-60b239ee3fdf",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "nN2G9F0oPHnasqsJ",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "TimeStamp",
+                "value": "=TimeStamp: {{ $now.toISO() }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        320
+      ],
+      "id": "f907206e-1102-4d8b-9eb8-f354a149493e",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CHZ53738B",
+          "mode": "list",
+          "cachedResultName": "new_channel"
+        },
+        "text": "=🚀 *New Lead Researched & Logged!*\n*Name:* {{ $('Webhook').item.json.body.fullName }}\n*Company:* {{ $('Webhook').item.json.body.businessName }} ({{ $('Webhook').item.json.body.businessSize }})\n*Website:* {{ $('Webhook').item.json.body.website }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        576,
+        256
+      ],
+      "id": "eac9e2a4-b177-44d3-b79c-ca1db6d55f46",
+      "name": "Send a message",
+      "webhookId": "fc216ab4-b50f-43fd-a9f9-c351ca838f72",
+      "credentials": {
+        "slackApi": {
+          "id": "7OzlsMHhDBPDeXxP",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "847a0071-afd9-4256-a49b-f3e80e39f100",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5b4562f4ac1f24b3e82a8efc8b3c92b25ae15629add7d5b8ac5a5d4d85db2702"
+  },
+  "nodeGroups": [],
+  "id": "ywQSZY8lMoxlsAgi",
+  "tags": []
+}
