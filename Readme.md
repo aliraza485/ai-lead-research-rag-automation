@@ -2,6 +2,10 @@
 
 An end-to-end AI automation pipeline built with **n8n**, **OpenAI (`gpt-4o-mini` & `text-embedding-3-small`)**, **Jina Reader**, **Google Sheets**, and **Slack**.
 
+## Working Demo
+
+https://github.com/aliraza485/ai-lead-research-rag-automation/releases/download/v1.0/Working_demo.mp4
+
 ## Architecture Overview
 
 1. **Lead Intake & Automated Research (`01_lead_intake_and_research.json`)**
